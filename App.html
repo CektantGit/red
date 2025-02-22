@@ -23,32 +23,42 @@
             height: 80%;
         }
 
-        select, button {
+        select {
             margin-top: 20px;
             padding: 10px;
             font-size: 16px;
         }
 
-        /* Скрытие элементов интерфейса, когда AR-сессия активна */
-        model-viewer[ar-status="session-started"] #animation-select,
-        model-viewer[ar-status="session-started"] #color-select,
-        model-viewer[ar-status="session-started"] #ar-text,
-        model-viewer[ar-status="session-started"] #ar-button {
+        /* Скрытие кнопки выбора анимации, когда AR-сессия активна */
+        model-viewer[ar-status="session-started"] #animation-select {
             display: none;
         }
 
-        /* Показ элементов интерфейса, когда AR не активен */
-        model-viewer[ar-status="not-presenting"] #animation-select,
-        model-viewer[ar-status="not-presenting"] #color-select,
-        model-viewer[ar-status="not-presenting"] #ar-text,
-        model-viewer[ar-status="not-presenting"] #ar-button {
+        /* Скрытие кнопки AR, когда не активен режим AR */
+        model-viewer[ar-status="not-presenting"] > #ar-button {
+            display: none;
+        }
+
+        /* Показ кнопки выбора анимации, когда AR не активен */
+        model-viewer[ar-status="not-presenting"] #animation-select {
             display: block;
         }
 
-        #ar-text {
-            font-size: 20px;
-            font-weight: bold;
-        }
+        model-viewer > #ar-prompt {
+    position: absolute;
+    left: 50%;
+    bottom: 175px;
+    animation: elongate 2s infinite ease-in-out alternate;
+    display: none;
+  }
+
+  model-viewer[ar-status="session-started"] > #ar-prompt {
+    display: block;
+  }
+
+  model-viewer > #ar-prompt > img {
+    animation: circle 4s linear infinite;
+  }
     </style>
 </head>
 <body>
@@ -65,31 +75,14 @@
     alt="An animated 3D model of a robot">
 </model-viewer>
 
-<!-- Text for AR status -->
-<div id="ar-text">AR is not active</div>
-
-<!-- Select for Animation -->
 <select id="animation-select">
     <option value="">Select Animation</option>
     <!-- Animation options will be dynamically filled here -->
 </select>
 
-<!-- Select for Color -->
-<select id="color-select">
-    <option value="red">Red</option>
-    <option value="blue">Blue</option>
-    <option value="green">Green</option>
-</select>
-
-<!-- AR Button -->
-<button id="ar-button" onclick="startAR()">Start AR</button>
-
 <script>
     const modelViewer = document.querySelector('#model-viewer');
     const animationSelect = document.querySelector('#animation-select');
-    const colorSelect = document.querySelector('#color-select');
-    const arText = document.querySelector('#ar-text');
-    const arButton = document.querySelector('#ar-button');
 
     // Listen for the model being loaded and get the available animations
     modelViewer.addEventListener('load', () => {
@@ -117,28 +110,14 @@
         }
     });
 
-    // Change model color based on selection
-    colorSelect.addEventListener('change', () => {
-        const selectedColor = colorSelect.value;
-        
-        if (selectedColor) {
-            // Change the model's material color (this assumes the model has a material that supports this)
-            modelViewer.setAttribute('style', `--model-color: ${selectedColor}`);
-        }
-    });
-
-    // Start AR mode manually (this is optional)
-    function startAR() {
-        modelViewer.enterAR();
-    }
-
-    // Update AR status and visibility of elements
+    // Ensure animation is applied when entering AR mode
     modelViewer.addEventListener('ar-status', (event) => {
-        console.log('AR Status:', event.detail.status);  // Debugging AR status
         if (event.detail.status === 'session-started') {
-            arText.textContent = "AR is active";
-        } else if (event.detail.status === 'not-presenting') {
-            arText.textContent = "AR is not active";
+            const selectedAnimation = animationSelect.value;
+            if (selectedAnimation) {
+                modelViewer.setAttribute('animation-name', selectedAnimation);
+                modelViewer.play();
+            }
         }
     });
 </script>
