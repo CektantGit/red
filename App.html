@@ -17,20 +17,46 @@
             height: 100vh;
             background-color: #f0f0f0;
         }
+
         #model-viewer {
             width: 80%;
             height: 80%;
         }
+
         select {
             margin-top: 20px;
             padding: 10px;
             font-size: 16px;
         }
+
+        /* Скрытие кнопки выбора анимации, когда AR-сессия активна */
+        model-viewer[ar-status="session-started"] #animation-select {
+            display: none;
+        }
+
+        /* Скрытие кнопки AR, когда не активен режим AR */
+        model-viewer[ar-status="not-presenting"] > #ar-button {
+            display: none;
+        }
+
+        /* Показ кнопки выбора анимации, когда AR не активен */
+        model-viewer[ar-status="not-presenting"] #animation-select {
+            display: block;
+        }
     </style>
 </head>
 <body>
 
-<model-viewer id="model-viewer" camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr quick-look" scale="0.2 0.2 0.2" shadow-intensity="1" src="untitled.glb" alt="An animated 3D model of a robot">
+<model-viewer id="model-viewer" 
+    camera-controls 
+    touch-action="pan-y" 
+    autoplay 
+    ar 
+    ar-modes="webxr quick-look" 
+    scale="0.2 0.2 0.2" 
+    shadow-intensity="1" 
+    src="untitled.glb" 
+    alt="An animated 3D model of a robot">
 </model-viewer>
 
 <select id="animation-select">
@@ -48,7 +74,6 @@
         
         if (animations.length > 0) {
             animations.forEach(animation => {
-                console.log(animation);
                 const option = document.createElement('option');
                 option.value = animation;
                 option.textContent = animation;
@@ -62,7 +87,6 @@
         const selectedAnimation = animationSelect.value;
         
         if (selectedAnimation) {
-            console.log(selectedAnimation);
             modelViewer.setAttribute('animation-name', selectedAnimation);
             modelViewer.play();
         } else {
@@ -72,8 +96,7 @@
 
     // Ensure animation is applied when entering AR mode
     modelViewer.addEventListener('ar-status', (event) => {
-        if (event.detail.status === 'started') {
-            // Ensure the correct animation is applied
+        if (event.detail.status === 'session-started') {
             const selectedAnimation = animationSelect.value;
             if (selectedAnimation) {
                 modelViewer.setAttribute('animation-name', selectedAnimation);
