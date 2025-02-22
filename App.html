@@ -29,51 +29,31 @@
             font-size: 16px;
         }
 
-        /* Скрытие кнопки выбора анимации, когда AR-сессия активна */
-        model-viewer[ar-status="session-started"] #animation-select {
+        /* Text for AR status */
+        #ar-status-text {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #4285f4;
             display: none;
         }
 
-        /* Скрытие кнопки AR, когда не активен режим AR */
-        model-viewer[ar-status="not-presenting"] > #ar-button {
-            display: none;
-        }
-
-        /* Показ кнопки выбора анимации, когда AR не активен */
-        model-viewer[ar-status="not-presenting"] #animation-select {
+        model-viewer[ar-status="session-started"] > #ar-status-text {
             display: block;
         }
 
-        model-viewer > #ar-prompt {
-    position: absolute;
-    left: 50%;
-    bottom: 175px;
-    animation: elongate 2s infinite ease-in-out alternate;
-    display: none;
-  }
-
-  model-viewer[ar-status="session-started"] > #ar-prompt {
-    display: block;
-  }
-
-  model-viewer > #ar-prompt > img {
-    animation: circle 4s linear infinite;
-  }
     </style>
 </head>
 <body>
 
-<model-viewer id="model-viewer" 
-    camera-controls 
-    touch-action="pan-y" 
-    autoplay 
-    ar 
-    ar-modes="webxr quick-look" 
-    scale="0.2 0.2 0.2" 
-    shadow-intensity="1" 
-    src="untitled.glb" 
-    alt="An animated 3D model of a robot">
+<model-viewer id="model-viewer" camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr quick-look" scale="0.2 0.2 0.2" shadow-intensity="1" src="untitled.glb" alt="An animated 3D model of a robot">
 </model-viewer>
+
+<!-- Text for AR status -->
+<div id="ar-status-text">AR is active</div>
 
 <select id="animation-select">
     <option value="">Select Animation</option>
@@ -90,6 +70,7 @@
         
         if (animations.length > 0) {
             animations.forEach(animation => {
+                console.log(animation);
                 const option = document.createElement('option');
                 option.value = animation;
                 option.textContent = animation;
@@ -103,6 +84,7 @@
         const selectedAnimation = animationSelect.value;
         
         if (selectedAnimation) {
+            console.log(selectedAnimation);
             modelViewer.setAttribute('animation-name', selectedAnimation);
             modelViewer.play();
         } else {
@@ -112,12 +94,11 @@
 
     // Ensure animation is applied when entering AR mode
     modelViewer.addEventListener('ar-status', (event) => {
+        const arStatusText = document.querySelector('#ar-status-text');
         if (event.detail.status === 'session-started') {
-            const selectedAnimation = animationSelect.value;
-            if (selectedAnimation) {
-                modelViewer.setAttribute('animation-name', selectedAnimation);
-                modelViewer.play();
-            }
+            arStatusText.textContent = 'AR is active';
+        } else if (event.detail.status === 'not-presenting') {
+            arStatusText.textContent = 'AR is not active';
         }
     });
 </script>
