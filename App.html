@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer</title>
+    <script type="module" src="https://modelviewer.dev/node_modules/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #model-viewer {
+            width: 80%;
+            height: 80%;
+        }
+        select {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<model-viewer id="model-viewer" camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr quick-look" scale="0.2 0.2 0.2" shadow-intensity="1" src="untitled.glb" alt="An animated 3D model of a robot">
+</model-viewer>
+
+<select id="animation-select">
+    <option value="">Select Animation</option>
+    <!-- Animation options will be dynamically filled here -->
+</select>
+
+<script>
+    const modelViewer = document.querySelector('#model-viewer');
+    const animationSelect = document.querySelector('#animation-select');
+
+    // Listen for the model being loaded and get the available animations
+    modelViewer.addEventListener('load', () => {
+        const animations = modelViewer.availableAnimations;
+        
+        if (animations.length > 0) {
+            animations.forEach(animation => {
+                console.log(animation);
+                const option = document.createElement('option');
+                option.value = animation;
+                option.textContent = animation;
+                animationSelect.appendChild(option);
+            });
+        }
+    });
+
+    // Change animation based on selection
+    animationSelect.addEventListener('change', () => {
+        const selectedAnimation = animationSelect.value;
+        
+        if (selectedAnimation) {
+            console.log(selectedAnimation);
+            modelViewer.setAttribute('animation-name', selectedAnimation);
+            modelViewer.play();
+        } else {
+            modelViewer.pause();
+        }
+    });
+
+    // Ensure animation is applied when entering AR mode
+    modelViewer.addEventListener('ar-status', (event) => {
+        if (event.detail.status === 'started') {
+            // Ensure the correct animation is applied
+            const selectedAnimation = animationSelect.value;
+            if (selectedAnimation) {
+                modelViewer.setAttribute('animation-name', selectedAnimation);
+                modelViewer.play();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
